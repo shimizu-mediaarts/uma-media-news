@@ -13,6 +13,7 @@ SEARCH_QUERIES = [
     "学校法人宇都宮美術学院",
 ]
 
+# 本校に関連する記事か確認するための必須キーワード
 STRICT_KEYWORDS = [
     "宇都宮メディア・アーツ",
     "宇都宮メディアアーツ",
@@ -20,14 +21,42 @@ STRICT_KEYWORDS = [
     "media-arts.ac.jp",
 ]
 
+# 除外したいネガティブワード・不適切なキーワードのリスト
+NEGATIVE_KEYWORDS = [
+    "事件",
+    "事故",
+    "逮捕",
+    "容疑",
+    "被害",
+    "不祥事",
+    "批判",
+    "炎上",
+    "不正",
+    "処分",
+    "違反",
+    "訴訟",
+    "疑惑",
+    "倒産",
+    "閉校",
+]
+
 
 def is_valid_uma_article(title, summary, url):
-  """宇都宮メディア・アーツ専門学校（宇都宮市中央1-10-12）に関する記事か判定"""
+  """宇都宮メディア・アーツ専門学校に関する記事か判定"""
   text_to_check = f"{title} {summary} {url}".lower()
   if "media-arts.ac.jp" in url:
     return True
   for kw in STRICT_KEYWORDS:
     if kw.lower() in text_to_check:
+      return True
+  return False
+
+
+def contains_negative_word(title, summary):
+  """ネガティブキーワードが含まれているか判定"""
+  text_to_check = f"{title} {summary}"
+  for word in NEGATIVE_KEYWORDS:
+    if word in text_to_check:
       return True
   return False
 
@@ -64,7 +93,13 @@ def fetch_google_news():
             source_elem.text if source_elem is not None else "Webニュース"
         )
 
+        # 本校に関係のない記事を除外
         if not is_valid_uma_article(title, "", link):
+          continue
+
+        # ネガティブワードが含まれている記事を自動除外
+        if contains_negative_word(title, ""):
+          print(f"ネガティブワード検知のため除外しました: {title}")
           continue
 
         try:
@@ -84,7 +119,6 @@ def fetch_google_news():
         ):
           category = "TV/ラジオ"
 
-        # linkが存在しない場合のみ本校HPをフォールバックとして指定
         article_url = link if link else "https://media-arts.ac.jp/"
 
         fetched_items.append({
@@ -129,6 +163,7 @@ def update_articles_json():
   if added_count > 0:
     with open(DATA_FILE, "w", encoding="utf-8") as f:
       json.dump(existing_articles, f, ensure_ascii=False, indent=2)
+    print(f"成功: {added_count} 件の記事を追加しました。")
 
 
 if __name__ == "__main__":
