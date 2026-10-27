@@ -1,6 +1,5 @@
 import json
 import os
-import re
 import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -8,41 +7,32 @@ import requests
 
 DATA_FILE = "articles.json"
 
-# 本校を識別するための検索クエリリスト
 SEARCH_QUERIES = [
     "宇都宮メディア・アーツ専門学校",
     "宇都宮メディアアーツ専門学校",
     "学校法人宇都宮美術学院",
 ]
 
-# 本校関連の記事であるかを検証する必須キーワード
 STRICT_KEYWORDS = [
     "宇都宮メディア・アーツ",
     "宇都宮メディアアーツ",
     "宇都宮美術学院",
     "media-arts.ac.jp",
-    "UMA",
 ]
 
 
 def is_valid_uma_article(title, summary, url):
-  """宇都宮メディア・アーツ専門学校（宇都宮市中央1-10-12）に関する記事か厳密判定"""
+  """宇都宮メディア・アーツ専門学校（宇都宮市中央1-10-12）に関する記事か判定"""
   text_to_check = f"{title} {summary} {url}".lower()
-
-  # 公式サイトのドメインが含まれている場合は無条件で許可
   if "media-arts.ac.jp" in url:
     return True
-
-  # 本校固有キーワードが含まれているかチェック
   for kw in STRICT_KEYWORDS:
     if kw.lower() in text_to_check:
       return True
-
   return False
 
 
 def fetch_google_news():
-  """GoogleニュースRSSから最新記事を取得"""
   fetched_items = []
   headers = {
       "User-Agent": (
@@ -74,7 +64,6 @@ def fetch_google_news():
             source_elem.text if source_elem is not None else "Webニュース"
         )
 
-        # ノイズ除去判定
         if not is_valid_uma_article(title, "", link):
           continue
 
@@ -87,7 +76,6 @@ def fetch_google_news():
 
         clean_title = title.rsplit(" - ", 1)[0] if " - " in title else title
 
-        # カテゴリ分類
         category = "Webニュース"
         if "新聞" in source_name or "下野" in source_name:
           category = "新聞掲載"
@@ -96,8 +84,11 @@ def fetch_google_news():
         ):
           category = "TV/ラジオ"
 
+        # linkが存在しない場合のみ本校HPをフォールバックとして指定
+        article_url = link if link else "https://media-arts.ac.jp/"
+
         fetched_items.append({
-            "id": f"auto-{abs(hash(link))}",
+            "id": f"auto-{abs(hash(article_url))}",
             "title": clean_title,
             "media": source_name,
             "date": pub_date,
@@ -105,13 +96,13 @@ def fetch_google_news():
             "importance": 4,
             "views": 0,
             "summary": (
-                f"{source_name}に掲載された宇都宮メディア・アーツ専門学校（宇都宮市中央1-10-12）に関する報道記事です。"
+                f"{source_name}に掲載された『{clean_title}』に関する報道記事です。"
             ),
-            "url": link,
-            "tags": ["宇都宮メディア・アーツ", source_name, "Web報道"],
+            "url": article_url,
+            "tags": ["宇都宮メディア・アーツ", source_name],
         })
     except Exception as e:
-      print(f"Error fetching query '{query}': {e}")
+      print(f"Error: {e}")
 
   return fetched_items
 
@@ -138,9 +129,6 @@ def update_articles_json():
   if added_count > 0:
     with open(DATA_FILE, "w", encoding="utf-8") as f:
       json.dump(existing_articles, f, ensure_ascii=False, indent=2)
-    print(f"成功: {added_count} 件の本校関連記事を追加しました。")
-  else:
-    print("新着記事はありませんでした。")
 
 
 if __name__ == "__main__":
