@@ -50,7 +50,7 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
 
         <!-- Controls Section: Search & Filters -->
-        <div class="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-6 mb-8 shadow-sm">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-6 mb-6 shadow-sm">
             <!-- Search & Primary Sort Bar -->
             <div class="flex flex-col lg:flex-row gap-4 mb-5">
                 <!-- Search Input -->
@@ -100,13 +100,20 @@
             </div>
         </div>
 
-        <!-- Media Badge Color Legend -->
-        <div class="flex flex-wrap items-center gap-3 mb-6 px-2 text-xs text-slate-500">
-            <span class="font-semibold text-slate-600"><i class="fa-solid fa-tags mr-1"></i>メディア凡例:</span>
-            <span class="px-2.5 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800 border border-blue-200">新聞掲載</span>
-            <span class="px-2.5 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">Webニュース / 地域メディア</span>
-            <span class="px-2.5 py-0.5 rounded-full font-medium bg-rose-100 text-rose-800 border border-rose-200">TV / ラジオ</span>
-            <span class="px-2.5 py-0.5 rounded-full font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">学校公式</span>
+        <!-- Media Badge Color Legend & Notice -->
+        <div class="mb-6 px-2 space-y-1.5">
+            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                <span class="font-semibold text-slate-600"><i class="fa-solid fa-tags mr-1"></i>メディア凡例:</span>
+                <span class="px-2.5 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800 border border-blue-200">新聞掲載</span>
+                <span class="px-2.5 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">Webニュース / 地域メディア</span>
+                <span class="px-2.5 py-0.5 rounded-full font-medium bg-rose-100 text-rose-800 border border-rose-200">TV / ラジオ</span>
+                <span class="px-2.5 py-0.5 rounded-full font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">学校公式</span>
+            </div>
+            <!-- 注意書き -->
+            <p class="text-[11px] text-slate-400 leading-relaxed flex items-center gap-1 pt-1">
+                <i class="fa-solid fa-circle-info text-amber-500"></i>
+                <span>※ 掲載から一定期間（半年〜1年以上）が経過した外部記事は、元メディア側の仕様によりページが削除・変更されている場合があります。</span>
+            </p>
         </div>
 
         <!-- Articles Grid / List Container -->
@@ -142,6 +149,16 @@
                     <span class="text-slate-500"><i class="fa-regular fa-eye text-slate-400 mr-1"></i><span id="modal-views">0</span> views</span>
                     <span id="modal-importance" class="text-amber-400 font-bold">★★★★★</span>
                 </div>
+
+                <!-- モーダル内注意アラート（古い記事のみ表示） -->
+                <div id="modal-old-notice" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-500 text-sm mt-0.5 shrink-0"></i>
+                    <div>
+                        <span class="font-bold">元記事のリンク期限に関する注意:</span>
+                        <p class="text-[11px] text-amber-700 mt-0.5">この記事は掲載から半年以上経過しているため、外部サイト側の元ページが移動または削除されている可能性があります。</p>
+                    </div>
+                </div>
+
                 <div>
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">概要・記事サマリー</h3>
                     <p id="modal-summary" class="text-slate-700 text-sm leading-relaxed whitespace-pre-line bg-slate-50 p-4 rounded-xl border border-slate-100"></p>
@@ -161,8 +178,9 @@
     </div>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
+    <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500 space-y-2">
         <p>© 宇都宮メディア・アーツ専門学校 Media Portal（宇都宮市中央1-10-12） | Powered by GitHub Actions Auto-Update</p>
+        <p class="text-[11px] text-slate-400">※掲載記事の著作権は各報道機関および提供元に帰属します。外部リンク先は予告なく変更・削除される場合があります。</p>
     </footer>
 
     <!-- Script Logic -->
@@ -171,6 +189,15 @@
         let currentCategory = 'all';
         let currentSort = 'date-desc';
         let currentView = 'grid';
+
+        // 半年以上経過しているか判定（180日基準）
+        function isOlderThanSixMonths(dateStr) {
+            if (!dateStr) return false;
+            const articleDate = new Date(dateStr);
+            const now = new Date();
+            const diffDays = Math.ceil((now - articleDate) / (1000 * 60 * 60 * 24));
+            return diffDays > 180;
+        }
 
         function getMediaBadgeClass(mediaName) {
             const media = (mediaName || '').toLowerCase();
@@ -259,6 +286,10 @@
                 const stars = '★'.repeat(item.importance) + '☆'.repeat(5 - item.importance);
                 const tagsHtml = (item.tags || []).map(t => `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 text-[11px]">#${t}</span>`).join(' ');
                 const mediaBadgeClass = getMediaBadgeClass(item.media);
+                
+                // 半年以上前の記事か判定
+                const isOld = isOlderThanSixMonths(item.date);
+                const oldBadgeHtml = isOld ? `<span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium" title="掲載から半年以上経過（リンク切れの可能性があります）"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i>リンク注意</span>` : '';
 
                 if (currentView === 'grid') {
                     return `
@@ -276,7 +307,10 @@
                         <div>
                             <div class="flex flex-wrap gap-1 mb-3">${tagsHtml}</div>
                             <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px] font-medium">${item.category}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px] font-medium">${item.category}</span>
+                                    ${oldBadgeHtml}
+                                </div>
                                 <span class="font-medium text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${item.date}</span>
                             </div>
                         </div>
@@ -288,6 +322,7 @@
                             <div class="flex items-center gap-2 mb-1.5 flex-wrap">
                                 <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${mediaBadgeClass} border">${item.media}</span>
                                 <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px]">${item.category}</span>
+                                ${oldBadgeHtml}
                                 <span class="text-xs text-slate-400"><i class="fa-regular fa-calendar mr-1"></i>${item.date}</span>
                             </div>
                             <h3 class="font-bold text-slate-900 text-sm hover:text-blue-600 transition">${item.title}</h3>
@@ -319,6 +354,14 @@
             document.getElementById('modal-importance').innerText = '★'.repeat(item.importance) + '☆'.repeat(5 - item.importance);
             document.getElementById('modal-summary').innerText = item.summary;
             document.getElementById('modal-url').href = item.url || '#';
+
+            // 半年以上前のアラート表示設定
+            const modalNotice = document.getElementById('modal-old-notice');
+            if (isOlderThanSixMonths(item.date)) {
+                modalNotice.classList.remove('hidden');
+            } else {
+                modalNotice.classList.add('hidden');
+            }
 
             const tagsContainer = document.getElementById('modal-tags');
             tagsContainer.innerHTML = (item.tags || []).map(t => `<span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">#${t}</span>`).join('');
