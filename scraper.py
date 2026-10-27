@@ -54,43 +54,38 @@ def get_detected_negative_words(title, summary):
   return [word for word in NEGATIVE_KEYWORDS if word in text_to_check]
 
 
-def send_google_chat_notification(skipped_items):
-  """Google Chatへ除外記事の通知を送信"""
+def send_google_chat_notification(title_text, items, is_warning=False):
+  """Google Chatへ通知を送信する汎用関数"""
   webhook_url = os.environ.get("GOOGLE_CHAT_WEBHOOK")
-  if not webhook_url or not skipped_items:
+  if not webhook_url or not items:
     return
 
-  message_text = (
-      "🛡️ **【宇都宮メディア・アーツ Media Portal】除外記事通知**\n"
-  )
-  message_text += (
-      f"今回の巡回で **{len(skipped_items)} 件**"
-      " の記事がネガティブワード検知により自動除外されました。\n\n"
-  )
+  icon = "🛡️" if is_warning else "📰"
+  message_text = f"{icon} **{title_text}**\n\n"
 
-  for idx, item in enumerate(skipped_items, 1):
-    message_text += (
-        f"{idx}. **[{item['media']}]** {item['title']}\n"
-        f"   ・検知ワード: `{item['words']}`\n"
-        f"   ・URL: {item['url']}\n\n"
-    )
+  for idx, item in enumerate(items, 1):
+    if is_warning:
+      message_text += (
+          f"{idx}. **[{item['media']}]** {item['title']}\n"
+          f"   ・検知ワード: `{item['words']}`\n"
+          f"   ・URL: {item['url']}\n\n"
+      )
+    else:
+      message_text += (
+          f"{idx}. **[{item['media']}]** {item['title']}\n"
+          f"   ・日付: {item['date']} | カテゴリ: {item['category']}\n"
+          f"   ・URL: {item['url']}\n\n"
+      )
 
   payload = {"text": message_text}
 
   try:
-    response = requests.post(
+    requests.post(
         webhook_url,
         json=payload,
         headers={"Content-Type": "application/json; charset=UTF-8"},
         timeout=10,
     )
-    if response.status_code == 200:
-      print("Google Chatへの通知送信が完了しました。")
-    else:
-      print(
-          f"Google Chat通知エラー: Status {response.status_code},"
-          f" {response.text}"
-      )
   except Exception as e:
     print(f"Google Chat送信処理エラー: {e}")
 
@@ -178,9 +173,13 @@ def fetch_google_news():
     except Exception as e:
       print(f"Error: {e}")
 
-  # 読み飛ばされた記事がある場合のみ Google Chat へ通知を送信
+  # 除外記事がある場合は警告通知
   if skipped_items:
-    send_google_chat_notification(skipped_items)
+    send_google_chat_notification(
+        f"【宇都宮メディア・アーツ】除外記事通知（{len(skipped_items)}件）",
+        skipped_items,
+        is_warning=True,
+    )
 
   return fetched_items
 
@@ -197,16 +196,23 @@ def update_articles_json():
   existing_urls = {item.get("url") for item in existing_articles}
   new_items = fetch_google_news()
 
-  added_count = 0
+  added_articles = []
   for item in new_items:
     if item["url"] not in existing_urls:
       existing_articles.insert(0, item)
       existing_urls.add(item["url"])
-      added_count += 1
+      added_articles.append(item)
 
-  if added_count > 0:
+  if added_articles:
     with open(DATA_FILE, "w", encoding="utf-8") as f:
       json.dump(existing_articles, f, ensure_ascii=False, indent=2)
+
+    # 新着記事が追加された場合のみ新着通知を送信
+    send_google_chat_notification(
+        f"【宇都宮メディア・アーツ】新着記事が追加されました（{len(added_articles)}件）",
+        added_articles,
+        is_warning=False,
+    )
 
 
 if __name__ == "__main__":
