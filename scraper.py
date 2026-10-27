@@ -13,7 +13,6 @@ SEARCH_QUERIES = [
     "学校法人宇都宮美術学院",
 ]
 
-# 本校に関連する記事か確認するための必須キーワード
 STRICT_KEYWORDS = [
     "宇都宮メディア・アーツ",
     "宇都宮メディアアーツ",
@@ -21,7 +20,6 @@ STRICT_KEYWORDS = [
     "media-arts.ac.jp",
 ]
 
-# 除外したいネガティブワード・不適切なキーワードのリスト
 NEGATIVE_KEYWORDS = [
     "事件",
     "事故",
@@ -42,7 +40,6 @@ NEGATIVE_KEYWORDS = [
 
 
 def is_valid_uma_article(title, summary, url):
-  """宇都宮メディア・アーツ専門学校に関する記事か判定"""
   text_to_check = f"{title} {summary} {url}".lower()
   if "media-arts.ac.jp" in url:
     return True
@@ -52,17 +49,56 @@ def is_valid_uma_article(title, summary, url):
   return False
 
 
-def contains_negative_word(title, summary):
-  """ネガティブキーワードが含まれているか判定"""
+def get_detected_negative_words(title, summary):
   text_to_check = f"{title} {summary}"
-  for word in NEGATIVE_KEYWORDS:
-    if word in text_to_check:
-      return True
-  return False
+  return [word for word in NEGATIVE_KEYWORDS if word in text_to_check]
+
+
+def send_google_chat_notification(skipped_items):
+  """Google Chatへ除外記事の通知を送信"""
+  webhook_url = os.environ.get("GOOGLE_CHAT_WEBHOOK")
+  if not webhook_url or not skipped_items:
+    return
+
+  message_text = (
+      "🛡️ **【宇都宮メディア・アーツ Media Portal】除外記事通知**\n"
+  )
+  message_text += (
+      f"今回の巡回で **{len(skipped_items)} 件**"
+      " の記事がネガティブワード検知により自動除外されました。\n\n"
+  )
+
+  for idx, item in enumerate(skipped_items, 1):
+    message_text += (
+        f"{idx}. **[{item['media']}]** {item['title']}\n"
+        f"   ・検知ワード: `{item['words']}`\n"
+        f"   ・URL: {item['url']}\n\n"
+    )
+
+  payload = {"text": message_text}
+
+  try:
+    response = requests.post(
+        webhook_url,
+        json=payload,
+        headers={"Content-Type": "application/json; charset=UTF-8"},
+        timeout=10,
+    )
+    if response.status_code == 200:
+      print("Google Chatへの通知送信が完了しました。")
+    else:
+      print(
+          f"Google Chat通知エラー: Status {response.status_code},"
+          f" {response.text}"
+      )
+  except Exception as e:
+    print(f"Google Chat送信処理エラー: {e}")
 
 
 def fetch_google_news():
   fetched_items = []
+  skipped_items = []
+
   headers = {
       "User-Agent": (
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -93,13 +129,19 @@ def fetch_google_news():
             source_elem.text if source_elem is not None else "Webニュース"
         )
 
-        # 本校に関係のない記事を除外
+        clean_title = title.rsplit(" - ", 1)[0] if " - " in title else title
+
         if not is_valid_uma_article(title, "", link):
           continue
 
-        # ネガティブワードが含まれている記事を自動除外
-        if contains_negative_word(title, ""):
-          print(f"ネガティブワード検知のため除外しました: {title}")
+        detected_words = get_detected_negative_words(title, "")
+        if detected_words:
+          skipped_items.append({
+              "title": clean_title,
+              "media": source_name,
+              "words": ", ".join(detected_words),
+              "url": link,
+          })
           continue
 
         try:
@@ -108,8 +150,6 @@ def fetch_google_news():
           ).strftime("%Y-%m-%d")
         except Exception:
           pub_date = datetime.now().strftime("%Y-%m-%d")
-
-        clean_title = title.rsplit(" - ", 1)[0] if " - " in title else title
 
         category = "Webニュース"
         if "新聞" in source_name or "下野" in source_name:
@@ -138,6 +178,10 @@ def fetch_google_news():
     except Exception as e:
       print(f"Error: {e}")
 
+  # 読み飛ばされた記事がある場合のみ Google Chat へ通知を送信
+  if skipped_items:
+    send_google_chat_notification(skipped_items)
+
   return fetched_items
 
 
@@ -163,7 +207,6 @@ def update_articles_json():
   if added_count > 0:
     with open(DATA_FILE, "w", encoding="utf-8") as f:
       json.dump(existing_articles, f, ensure_ascii=False, indent=2)
-    print(f"成功: {added_count} 件の記事を追加しました。")
 
 
 if __name__ == "__main__":
