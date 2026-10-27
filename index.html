@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宇都宮メディア・アーツ専門学校 - メディア掲載・Web記事アーカイブ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%); }
+        .card-hover { transition: all 0.25s ease-in-out; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -10px rgba(124, 58, 237, 0.3); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Header -->
+    <header class="gradient-bg border-b border-slate-800 sticky top-0 z-30 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center font-black text-xl text-white shadow-md">
+                        UMA
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                            宇都宮メディア・アーツ専門学校
+                            <span class="text-xs font-normal px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Media Portal</span>
+                        </h1>
+                        <p class="text-xs text-slate-400">Web記事 & メディア掲載情報アーカイブ</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <span id="auto-update-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        毎朝7:00 自動更新中
+                    </span>
+                    <button id="add-article-btn" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold shadow flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-plus"></i> 記事登録
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- Controls Section: Search & Filters -->
+        <div class="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-4 sm:p-6 mb-8 shadow-xl">
+            <!-- Search & Primary Sort Bar -->
+            <div class="flex flex-col lg:flex-row gap-4 mb-6">
+                <!-- Search Input -->
+                <div class="relative flex-grow">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="search-input" placeholder="キーワード、メディア名、タグで検索..." 
+                           class="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:border-purple-500 text-sm text-slate-100 placeholder-slate-500 transition">
+                </div>
+
+                <!-- Sort Options -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 border border-slate-800 rounded-xl text-xs text-slate-300">
+                        <i class="fa-solid fa-sort text-purple-400"></i>
+                        <span>ソート:</span>
+                        <select id="sort-select" class="bg-transparent text-white font-medium focus:outline-none cursor-pointer">
+                            <option value="date-desc" class="bg-slate-900">日付：新しい順</option>
+                            <option value="date-asc" class="bg-slate-900">日付：古い順</option>
+                            <option value="importance-desc" class="bg-slate-900">重要度：高い順 (★)</option>
+                            <option value="views-desc" class="bg-slate-900">人気順（閲覧数）</option>
+                        </select>
+                    </div>
+
+                    <!-- View Switcher -->
+                    <div class="flex border border-slate-800 bg-slate-950 rounded-xl p-1">
+                        <button id="grid-view-btn" class="px-2.5 py-1 rounded-lg text-xs font-medium text-purple-400 bg-slate-800 transition">
+                            <i class="fa-solid fa-border-all"></i>
+                        </button>
+                        <button id="list-view-btn" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition">
+                            <i class="fa-solid fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="flex items-center justify-between border-t border-slate-800/80 pt-4 flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2" id="category-tabs">
+                    <button data-category="all" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-purple-600 text-white shadow-sm transition">すべて</button>
+                    <button data-category="新聞掲載" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">新聞掲載</button>
+                    <button data-category="Webニュース" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Webニュース</button>
+                    <button data-category="TV/ラジオ" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">TV/ラジオ</button>
+                    <button data-category="コンテスト/受賞情報" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">コンテスト/受賞</button>
+                </div>
+                <div class="text-xs text-slate-400">
+                    該当件数: <span id="article-count" class="font-bold text-purple-400">0</span> 件
+                </div>
+            </div>
+        </div>
+
+        <!-- Articles Grid / List Container -->
+        <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Articles will be dynamically rendered here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-16 bg-slate-900/50 rounded-2xl border border-slate-800">
+            <i class="fa-solid fa-newspaper text-4xl text-slate-600 mb-3"></i>
+            <p class="text-slate-400 font-medium">条件に一致する記事が見つかりませんでした。</p>
+            <button id="reset-filters-btn" class="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg transition text-slate-200">
+                検索条件をリセット
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Article Detail Modal -->
+    <div id="detail-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-start">
+                <div>
+                    <span id="modal-category" class="inline-block px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 text-xs font-semibold mb-2">カテゴリ</span>
+                    <h2 id="modal-title" class="text-xl font-bold text-white leading-snug">タイトル</h2>
+                </div>
+                <button id="close-modal" class="text-slate-400 hover:text-white text-xl p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-4">
+                <div class="flex items-center gap-4 text-xs text-slate-400 border-b border-slate-800/60 pb-3">
+                    <span><i class="fa-regular fa-newspaper text-purple-400 mr-1"></i> <span id="modal-media">掲載メディア</span></span>
+                    <span><i class="fa-regular fa-calendar text-purple-400 mr-1"></i> <span id="modal-date">日付</span></span>
+                    <span><i class="fa-regular fa-eye text-purple-400 mr-1"></i> <span id="modal-views">0</span> views</span>
+                    <span id="modal-importance" class="text-amber-400">★★★★★</span>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">概要・記事サマリー</h3>
+                    <p id="modal-summary" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line"></p>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">関連タグ</h3>
+                    <div id="modal-tags" class="flex flex-wrap gap-1.5"></div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-950 border-t border-slate-800 flex justify-between items-center">
+                <span class="text-xs text-slate-500">宇都宮メディア・アーツ専門学校 アーカイブ</span>
+                <a id="modal-url" href="#" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition">
+                    掲載元ページを開く <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <p>© 宇都宮メディア・アーツ専門学校 Media Portal | Powered by GitHub Actions Auto-Update</p>
+    </footer>
+
+    <!-- Script Logic -->
+    <script>
+        let articlesData = [];
+        let currentCategory = 'all';
+        let currentSort = 'date-desc';
+        let currentView = 'grid';
+
+        // Load Articles from JSON
+        async function loadArticles() {
+            try {
+                const res = await fetch('articles.json');
+                if (res.ok) {
+                    articlesData = await res.json();
+                } else {
+                    articlesData = getFallbackArticles();
+                }
+            } catch (e) {
+                console.error("Data load error:", e);
+                articlesData = getFallbackArticles();
+            }
+            renderArticles();
+        }
+
+        function getFallbackArticles() {
+            return [
+                {
+                    "id": "init-1",
+                    "title": "【メディア掲載】ビジュアルデザイン科が地元企業とコラボ商品を開発",
+                    "media": "下野新聞",
+                    "date": "2026-04-10",
+                    "category": "新聞掲載",
+                    "importance": 5,
+                    "views": 142,
+                    "summary": "本校ビジュアルデザイン科の学生が、栃木県内の食品メーカーと共同で新商品のパッケージデザインを手掛けました。",
+                    "url": "https://mediaarts.ac.jp/",
+                    "tags": ["ビジュアルデザイン科", "産学連携", "下野新聞"]
+                }
+            ];
+        }
+
+        function renderArticles() {
+            const container = document.getElementById('articles-container');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            
+            // Filter
+            let filtered = articlesData.filter(item => {
+                const matchCat = (currentCategory === 'all' || item.category === currentCategory);
+                const matchSearch = item.title.toLowerCase().includes(searchVal) || 
+                                    item.media.toLowerCase().includes(searchVal) || 
+                                    item.summary.toLowerCase().includes(searchVal) ||
+                                    (item.tags && item.tags.some(t => t.toLowerCase().includes(searchVal)));
+                return matchCat && matchSearch;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                if (currentSort === 'date-desc') return new Date(b.date) - new Date(a.date);
+                if (currentSort === 'date-asc') return new Date(a.date) - new Date(b.date);
+                if (currentSort === 'importance-desc') return b.importance - a.importance;
+                if (currentSort === 'views-desc') return (b.views || 0) - (a.views || 0);
+                return 0;
+            });
+
+            document.getElementById('article-count').innerText = filtered.length;
+            const emptyState = document.getElementById('empty-state');
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            // View class setting
+            if (currentView === 'grid') {
+                container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+            } else {
+                container.className = "flex flex-col gap-4";
+            }
+
+            container.innerHTML = filtered.map(item => {
+                const stars = '★'.repeat(item.importance) + '☆'.repeat(5 - item.importance);
+                const tagsHtml = (item.tags || []).map(t => `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px]">#${t}</span>`).join(' ');
+
+                if (currentView === 'grid') {
+                    return `
+                    <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 card-hover flex flex-col justify-between cursor-pointer" onclick="openModal('${item.id}')">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">${item.category}</span>
+                                <span class="text-xs text-amber-400 font-semibold">${stars}</span>
+                            </div>
+                            <h3 class="font-bold text-white text-base mb-2 line-clamp-2 leading-snug hover:text-purple-300 transition">${item.title}</h3>
+                            <p class="text-slate-400 text-xs line-clamp-3 mb-4 leading-relaxed">${item.summary}</p>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap gap-1 mb-3">${tagsHtml}</div>
+                            <div class="pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-500">
+                                <span class="font-medium text-slate-400"><i class="fa-regular fa-newspaper mr-1 text-purple-400"></i>${item.media}</span>
+                                <span>${item.date}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                } else {
+                    return `
+                    <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 card-hover flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer" onclick="openModal('${item.id}')">
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-500/10 text-purple-400">${item.category}</span>
+                                <span class="text-xs font-semibold text-slate-400"><i class="fa-regular fa-newspaper mr-1 text-purple-400"></i>${item.media}</span>
+                                <span class="text-xs text-slate-500">• ${item.date}</span>
+                            </div>
+                            <h3 class="font-bold text-white text-sm hover:text-purple-300 transition">${item.title}</h3>
+                        </div>
+                        <div class="flex items-center gap-4 shrink-0">
+                            <span class="text-xs text-amber-400">${stars}</span>
+                            <span class="text-xs text-purple-400 flex items-center gap-1 font-medium">詳細 <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                        </div>
+                    </div>`;
+                }
+            }).join('');
+        }
+
+        function openModal(id) {
+            const item = articlesData.find(a => a.id === id);
+            if (!item) return;
+
+            item.views = (item.views || 0) + 1;
+
+            document.getElementById('modal-category').innerText = item.category;
+            document.getElementById('modal-title').innerText = item.title;
+            document.getElementById('modal-media').innerText = item.media;
+            document.getElementById('modal-date').innerText = item.date;
+            document.getElementById('modal-views').innerText = item.views;
+            document.getElementById('modal-importance').innerText = '★'.repeat(item.importance) + '☆'.repeat(5 - item.importance);
+            document.getElementById('modal-summary').innerText = item.summary;
+            document.getElementById('modal-url').href = item.url || '#';
+
+            const tagsContainer = document.getElementById('modal-tags');
+            tagsContainer.innerHTML = (item.tags || []).map(t => `<span class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 text-xs">#${t}</span>`).join('');
+
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        // Event Listeners
+        document.getElementById('close-modal').onclick = () => document.getElementById('detail-modal').classList.add('hidden');
+        document.getElementById('search-input').oninput = renderArticles;
+        document.getElementById('sort-select').onchange = (e) => { currentSort = e.target.value; renderArticles(); };
+
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.cat-btn').forEach(b => b.className = "cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition");
+                btn.className = "cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-purple-600 text-white shadow-sm transition";
+                currentCategory = btn.dataset.category;
+                renderArticles();
+            };
+        });
+
+        document.getElementById('grid-view-btn').onclick = () => {
+            currentView = 'grid';
+            document.getElementById('grid-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-purple-400 bg-slate-800 transition";
+            document.getElementById('list-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition";
+            renderArticles();
+        };
+
+        document.getElementById('list-view-btn').onclick = () => {
+            currentView = 'list';
+            document.getElementById('list-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-purple-400 bg-slate-800 transition";
+            document.getElementById('grid-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition";
+            renderArticles();
+        };
+
+        document.addEventListener('DOMContentLoaded', loadArticles);
+    </script>
+</body>
+</html>
