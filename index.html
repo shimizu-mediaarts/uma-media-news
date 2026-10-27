@@ -12,41 +12,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans JP', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%); }
-        .card-hover { transition: all 0.25s ease-in-out; }
-        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -10px rgba(124, 58, 237, 0.3); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        .header-gradient { background: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #4f46e5 100%); }
+        .card-hover { transition: all 0.2s ease-in-out; }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15); }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
 
     <!-- Header -->
-    <header class="gradient-bg border-b border-slate-800 sticky top-0 z-30 shadow-lg">
+    <header class="header-gradient text-white shadow-md sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center font-black text-xl text-white shadow-md">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center font-black text-xl text-white shadow-inner border border-white/30">
                         UMA
                     </div>
                     <div>
                         <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
                             宇都宮メディア・アーツ専門学校
-                            <span class="text-xs font-normal px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Media Portal</span>
+                            <span class="text-xs font-normal px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/30">Media Portal</span>
                         </h1>
-                        <p class="text-xs text-slate-400">Web記事 & メディア掲載情報アーカイブ</p>
+                        <p class="text-xs text-blue-100">Web記事 & メディア掲載情報ポータル（宇都宮市中央1-10-12）</p>
                     </div>
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <span id="auto-update-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span id="auto-update-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-100 border border-emerald-400/30">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                         毎朝7:00 自動更新中
                     </span>
-                    <button id="add-article-btn" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold shadow flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-plus"></i> 記事登録
-                    </button>
                 </div>
             </div>
         </div>
@@ -56,54 +50,63 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
 
         <!-- Controls Section: Search & Filters -->
-        <div class="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-4 sm:p-6 mb-8 shadow-xl">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-6 mb-8 shadow-sm">
             <!-- Search & Primary Sort Bar -->
-            <div class="flex flex-col lg:flex-row gap-4 mb-6">
+            <div class="flex flex-col lg:flex-row gap-4 mb-5">
                 <!-- Search Input -->
                 <div class="relative flex-grow">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input type="text" id="search-input" placeholder="キーワード、メディア名、タグで検索..." 
-                           class="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:border-purple-500 text-sm text-slate-100 placeholder-slate-500 transition">
+                           class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm text-slate-800 placeholder-slate-400 transition">
                 </div>
 
                 <!-- Sort Options -->
                 <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 border border-slate-800 rounded-xl text-xs text-slate-300">
-                        <i class="fa-solid fa-sort text-purple-400"></i>
-                        <span>ソート:</span>
-                        <select id="sort-select" class="bg-transparent text-white font-medium focus:outline-none cursor-pointer">
-                            <option value="date-desc" class="bg-slate-900">日付：新しい順</option>
-                            <option value="date-asc" class="bg-slate-900">日付：古い順</option>
-                            <option value="importance-desc" class="bg-slate-900">重要度：高い順 (★)</option>
-                            <option value="views-desc" class="bg-slate-900">人気順（閲覧数）</option>
+                    <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 border border-slate-200 rounded-xl text-xs text-slate-600">
+                        <i class="fa-solid fa-arrow-down-wide-short text-blue-600"></i>
+                        <span class="font-medium">並び順:</span>
+                        <select id="sort-select" class="bg-transparent text-slate-800 font-semibold focus:outline-none cursor-pointer">
+                            <option value="date-desc">日付：新しい順</option>
+                            <option value="date-asc">日付：古い順</option>
+                            <option value="importance-desc">重要度：高い順 (★)</option>
+                            <option value="views-desc">人気順（閲覧数）</option>
                         </select>
                     </div>
 
                     <!-- View Switcher -->
-                    <div class="flex border border-slate-800 bg-slate-950 rounded-xl p-1">
-                        <button id="grid-view-btn" class="px-2.5 py-1 rounded-lg text-xs font-medium text-purple-400 bg-slate-800 transition">
-                            <i class="fa-solid fa-border-all"></i>
+                    <div class="flex border border-slate-200 bg-slate-100 rounded-xl p-1">
+                        <button id="grid-view-btn" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-blue-600 bg-white shadow-sm transition">
+                            <i class="fa-solid fa-border-all mr-1"></i>グリッド
                         </button>
-                        <button id="list-view-btn" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition">
-                            <i class="fa-solid fa-list"></i>
+                        <button id="list-view-btn" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 transition">
+                            <i class="fa-solid fa-list mr-1"></i>リスト
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- Category Tabs -->
-            <div class="flex items-center justify-between border-t border-slate-800/80 pt-4 flex-wrap gap-2">
+            <div class="flex items-center justify-between border-t border-slate-100 pt-4 flex-wrap gap-2">
                 <div class="flex flex-wrap gap-2" id="category-tabs">
-                    <button data-category="all" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-purple-600 text-white shadow-sm transition">すべて</button>
-                    <button data-category="新聞掲載" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">新聞掲載</button>
-                    <button data-category="Webニュース" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Webニュース</button>
-                    <button data-category="TV/ラジオ" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">TV/ラジオ</button>
-                    <button data-category="コンテスト/受賞情報" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">コンテスト/受賞</button>
+                    <button data-category="all" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm transition">すべて</button>
+                    <button data-category="新聞掲載" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">新聞掲載</button>
+                    <button data-category="Webニュース" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Webニュース</button>
+                    <button data-category="TV/ラジオ" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">TV/ラジオ</button>
+                    <button data-category="コンテスト/受賞情報" class="cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">コンテスト/受賞</button>
                 </div>
-                <div class="text-xs text-slate-400">
-                    該当件数: <span id="article-count" class="font-bold text-purple-400">0</span> 件
+                <div class="text-xs text-slate-500 font-medium">
+                    該当件数: <span id="article-count" class="font-bold text-blue-600 text-sm">0</span> 件
                 </div>
             </div>
+        </div>
+
+        <!-- Media Badge Color Legend -->
+        <div class="flex flex-wrap items-center gap-3 mb-6 px-2 text-xs text-slate-500">
+            <span class="font-semibold text-slate-600"><i class="fa-solid fa-tags mr-1"></i>メディア凡例:</span>
+            <span class="px-2.5 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800 border border-blue-200">新聞掲載</span>
+            <span class="px-2.5 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">Webニュース / 地域メディア</span>
+            <span class="px-2.5 py-0.5 rounded-full font-medium bg-rose-100 text-rose-800 border border-rose-200">TV / ラジオ</span>
+            <span class="px-2.5 py-0.5 rounded-full font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">学校公式</span>
         </div>
 
         <!-- Articles Grid / List Container -->
@@ -112,10 +115,10 @@
         </div>
 
         <!-- Empty State -->
-        <div id="empty-state" class="hidden text-center py-16 bg-slate-900/50 rounded-2xl border border-slate-800">
-            <i class="fa-solid fa-newspaper text-4xl text-slate-600 mb-3"></i>
-            <p class="text-slate-400 font-medium">条件に一致する記事が見つかりませんでした。</p>
-            <button id="reset-filters-btn" class="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg transition text-slate-200">
+        <div id="empty-state" class="hidden text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <i class="fa-solid fa-newspaper text-4xl text-slate-300 mb-3"></i>
+            <p class="text-slate-500 font-medium">条件に一致する記事が見つかりませんでした。</p>
+            <button id="reset-filters-btn" onclick="resetFilters()" class="mt-4 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-lg transition">
                 検索条件をリセット
             </button>
         </div>
@@ -123,34 +126,34 @@
     </main>
 
     <!-- Article Detail Modal -->
-    <div id="detail-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div class="p-6 border-b border-slate-800 flex justify-between items-start">
+    <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
                 <div>
-                    <span id="modal-category" class="inline-block px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 text-xs font-semibold mb-2">カテゴリ</span>
-                    <h2 id="modal-title" class="text-xl font-bold text-white leading-snug">タイトル</h2>
+                    <span id="modal-category" class="inline-block px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold mb-2">カテゴリ</span>
+                    <h2 id="modal-title" class="text-lg font-bold text-slate-900 leading-snug">タイトル</h2>
                 </div>
-                <button id="close-modal" class="text-slate-400 hover:text-white text-xl p-1"><i class="fa-solid fa-xmark"></i></button>
+                <button id="close-modal" class="text-slate-400 hover:text-slate-600 text-xl p-1 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar space-y-4">
-                <div class="flex items-center gap-4 text-xs text-slate-400 border-b border-slate-800/60 pb-3">
-                    <span><i class="fa-regular fa-newspaper text-purple-400 mr-1"></i> <span id="modal-media">掲載メディア</span></span>
-                    <span><i class="fa-regular fa-calendar text-purple-400 mr-1"></i> <span id="modal-date">日付</span></span>
-                    <span><i class="fa-regular fa-eye text-purple-400 mr-1"></i> <span id="modal-views">0</span> views</span>
-                    <span id="modal-importance" class="text-amber-400">★★★★★</span>
+            <div class="p-6 overflow-y-auto space-y-4">
+                <div class="flex flex-wrap items-center gap-3 text-xs border-b border-slate-100 pb-3">
+                    <span id="modal-media-badge" class="px-2.5 py-1 rounded-full font-semibold">掲載メディア</span>
+                    <span class="text-slate-500"><i class="fa-regular fa-calendar text-slate-400 mr-1"></i><span id="modal-date">日付</span></span>
+                    <span class="text-slate-500"><i class="fa-regular fa-eye text-slate-400 mr-1"></i><span id="modal-views">0</span> views</span>
+                    <span id="modal-importance" class="text-amber-400 font-bold">★★★★★</span>
                 </div>
                 <div>
-                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">概要・記事サマリー</h3>
-                    <p id="modal-summary" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line"></p>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">概要・記事サマリー</h3>
+                    <p id="modal-summary" class="text-slate-700 text-sm leading-relaxed whitespace-pre-line bg-slate-50 p-4 rounded-xl border border-slate-100"></p>
                 </div>
                 <div>
-                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">関連タグ</h3>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">関連タグ</h3>
                     <div id="modal-tags" class="flex flex-wrap gap-1.5"></div>
                 </div>
             </div>
-            <div class="p-4 bg-slate-950 border-t border-slate-800 flex justify-between items-center">
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
                 <span class="text-xs text-slate-500">宇都宮メディア・アーツ専門学校 アーカイブ</span>
-                <a id="modal-url" href="#" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition">
+                <a id="modal-url" href="#" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm">
                     掲載元ページを開く <i class="fa-solid fa-arrow-up-right-from-square"></i>
                 </a>
             </div>
@@ -158,8 +161,8 @@
     </div>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
-        <p>© 宇都宮メディア・アーツ専門学校 Media Portal | Powered by GitHub Actions Auto-Update</p>
+    <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
+        <p>© 宇都宮メディア・アーツ専門学校 Media Portal（宇都宮市中央1-10-12） | Powered by GitHub Actions Auto-Update</p>
     </footer>
 
     <!-- Script Logic -->
@@ -169,7 +172,19 @@
         let currentSort = 'date-desc';
         let currentView = 'grid';
 
-        // Load Articles from JSON
+        function getMediaBadgeClass(mediaName) {
+            const media = (mediaName || '').toLowerCase();
+            if (media.includes('新聞') || media.includes('下野')) {
+                return 'bg-blue-100 text-blue-800 border-blue-200';
+            } else if (media.includes('テレビ') || media.includes('tv') || media.includes('ラジオ') || media.includes('nhk')) {
+                return 'bg-rose-100 text-rose-800 border-rose-200';
+            } else if (media.includes('公式')) {
+                return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+            } else {
+                return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+            }
+        }
+
         async function loadArticles() {
             try {
                 const res = await fetch('articles.json');
@@ -188,16 +203,16 @@
         function getFallbackArticles() {
             return [
                 {
-                    "id": "init-1",
-                    "title": "【メディア掲載】ビジュアルデザイン科が地元企業とコラボ商品を開発",
-                    "media": "下野新聞",
-                    "date": "2026-04-10",
-                    "category": "新聞掲載",
+                    "id": "uma-50th",
+                    "title": "【創立50周年】宇都宮メディア・アーツ専門学校 創立50周年記念事業のお知らせ",
+                    "media": "公式ニュース",
+                    "date": "2026-10-20",
+                    "category": "Webニュース",
                     "importance": 5,
-                    "views": 142,
-                    "summary": "本校ビジュアルデザイン科の学生が、栃木県内の食品メーカーと共同で新商品のパッケージデザインを手掛けました。",
-                    "url": "https://mediaarts.ac.jp/",
-                    "tags": ["ビジュアルデザイン科", "産学連携", "下野新聞"]
+                    "views": 312,
+                    "summary": "宇都宮市中央1-10-12に校舎を構える宇都宮メディア・アーツ専門学校は創立50周年を迎えます。",
+                    "url": "https://media-arts.ac.jp/",
+                    "tags": ["創立50周年", "宇都宮メディア・アーツ"]
                 }
             ];
         }
@@ -206,7 +221,6 @@
             const container = document.getElementById('articles-container');
             const searchVal = document.getElementById('search-input').value.toLowerCase();
             
-            // Filter
             let filtered = articlesData.filter(item => {
                 const matchCat = (currentCategory === 'all' || item.category === currentCategory);
                 const matchSearch = item.title.toLowerCase().includes(searchVal) || 
@@ -216,7 +230,6 @@
                 return matchCat && matchSearch;
             });
 
-            // Sort
             filtered.sort((a, b) => {
                 if (currentSort === 'date-desc') return new Date(b.date) - new Date(a.date);
                 if (currentSort === 'date-asc') return new Date(a.date) - new Date(b.date);
@@ -236,50 +249,52 @@
                 emptyState.classList.add('hidden');
             }
 
-            // View class setting
             if (currentView === 'grid') {
                 container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
             } else {
-                container.className = "flex flex-col gap-4";
+                container.className = "flex flex-col gap-3";
             }
 
             container.innerHTML = filtered.map(item => {
                 const stars = '★'.repeat(item.importance) + '☆'.repeat(5 - item.importance);
-                const tagsHtml = (item.tags || []).map(t => `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px]">#${t}</span>`).join(' ');
+                const tagsHtml = (item.tags || []).map(t => `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 text-[11px]">#${t}</span>`).join(' ');
+                const mediaBadgeClass = getMediaBadgeClass(item.media);
 
                 if (currentView === 'grid') {
                     return `
-                    <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 card-hover flex flex-col justify-between cursor-pointer" onclick="openModal('${item.id}')">
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-5 card-hover flex flex-col justify-between cursor-pointer shadow-sm" onclick="openModal('${item.id}')">
                         <div>
                             <div class="flex items-center justify-between gap-2 mb-3">
-                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">${item.category}</span>
-                                <span class="text-xs text-amber-400 font-semibold">${stars}</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${mediaBadgeClass} border">
+                                    <i class="fa-regular fa-newspaper mr-1"></i>${item.media}
+                                </span>
+                                <span class="text-xs text-amber-400 font-bold">${stars}</span>
                             </div>
-                            <h3 class="font-bold text-white text-base mb-2 line-clamp-2 leading-snug hover:text-purple-300 transition">${item.title}</h3>
-                            <p class="text-slate-400 text-xs line-clamp-3 mb-4 leading-relaxed">${item.summary}</p>
+                            <h3 class="font-bold text-slate-900 text-base mb-2 line-clamp-2 leading-snug hover:text-blue-600 transition">${item.title}</h3>
+                            <p class="text-slate-600 text-xs line-clamp-3 mb-4 leading-relaxed">${item.summary}</p>
                         </div>
                         <div>
                             <div class="flex flex-wrap gap-1 mb-3">${tagsHtml}</div>
-                            <div class="pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-500">
-                                <span class="font-medium text-slate-400"><i class="fa-regular fa-newspaper mr-1 text-purple-400"></i>${item.media}</span>
-                                <span>${item.date}</span>
+                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px] font-medium">${item.category}</span>
+                                <span class="font-medium text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${item.date}</span>
                             </div>
                         </div>
                     </div>`;
                 } else {
                     return `
-                    <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 card-hover flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer" onclick="openModal('${item.id}')">
+                    <div class="bg-white border border-slate-200/80 rounded-xl p-4 card-hover flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer shadow-sm" onclick="openModal('${item.id}')">
                         <div class="flex-grow">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-500/10 text-purple-400">${item.category}</span>
-                                <span class="text-xs font-semibold text-slate-400"><i class="fa-regular fa-newspaper mr-1 text-purple-400"></i>${item.media}</span>
-                                <span class="text-xs text-slate-500">• ${item.date}</span>
+                            <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${mediaBadgeClass} border">${item.media}</span>
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px]">${item.category}</span>
+                                <span class="text-xs text-slate-400"><i class="fa-regular fa-calendar mr-1"></i>${item.date}</span>
                             </div>
-                            <h3 class="font-bold text-white text-sm hover:text-purple-300 transition">${item.title}</h3>
+                            <h3 class="font-bold text-slate-900 text-sm hover:text-blue-600 transition">${item.title}</h3>
                         </div>
                         <div class="flex items-center gap-4 shrink-0">
-                            <span class="text-xs text-amber-400">${stars}</span>
-                            <span class="text-xs text-purple-400 flex items-center gap-1 font-medium">詳細 <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                            <span class="text-xs text-amber-400 font-bold">${stars}</span>
+                            <span class="text-xs text-blue-600 flex items-center gap-1 font-semibold">詳細 <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
                         </div>
                     </div>`;
                 }
@@ -294,7 +309,11 @@
 
             document.getElementById('modal-category').innerText = item.category;
             document.getElementById('modal-title').innerText = item.title;
-            document.getElementById('modal-media').innerText = item.media;
+            
+            const mediaBadge = document.getElementById('modal-media-badge');
+            mediaBadge.innerText = item.media;
+            mediaBadge.className = `px-3 py-1 rounded-full text-xs font-semibold border ${getMediaBadgeClass(item.media)}`;
+
             document.getElementById('modal-date').innerText = item.date;
             document.getElementById('modal-views').innerText = item.views;
             document.getElementById('modal-importance').innerText = '★'.repeat(item.importance) + '☆'.repeat(5 - item.importance);
@@ -302,20 +321,27 @@
             document.getElementById('modal-url').href = item.url || '#';
 
             const tagsContainer = document.getElementById('modal-tags');
-            tagsContainer.innerHTML = (item.tags || []).map(t => `<span class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 text-xs">#${t}</span>`).join('');
+            tagsContainer.innerHTML = (item.tags || []).map(t => `<span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">#${t}</span>`).join('');
 
             document.getElementById('detail-modal').classList.remove('hidden');
         }
 
-        // Event Listeners
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            currentCategory = 'all';
+            document.querySelectorAll('.cat-btn').forEach(b => b.className = "cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition");
+            document.querySelector('.cat-btn[data-category="all"]').className = "cat-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm transition";
+            renderArticles();
+        }
+
         document.getElementById('close-modal').onclick = () => document.getElementById('detail-modal').classList.add('hidden');
         document.getElementById('search-input').oninput = renderArticles;
         document.getElementById('sort-select').onchange = (e) => { currentSort = e.target.value; renderArticles(); };
 
         document.querySelectorAll('.cat-btn').forEach(btn => {
             btn.onclick = () => {
-                document.querySelectorAll('.cat-btn').forEach(b => b.className = "cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition");
-                btn.className = "cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-purple-600 text-white shadow-sm transition";
+                document.querySelectorAll('.cat-btn').forEach(b => b.className = "cat-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition");
+                btn.className = "cat-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm transition";
                 currentCategory = btn.dataset.category;
                 renderArticles();
             };
@@ -323,15 +349,15 @@
 
         document.getElementById('grid-view-btn').onclick = () => {
             currentView = 'grid';
-            document.getElementById('grid-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-purple-400 bg-slate-800 transition";
-            document.getElementById('list-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition";
+            document.getElementById('grid-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-semibold text-blue-600 bg-white shadow-sm transition";
+            document.getElementById('list-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 transition";
             renderArticles();
         };
 
         document.getElementById('list-view-btn').onclick = () => {
             currentView = 'list';
-            document.getElementById('list-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-purple-400 bg-slate-800 transition";
-            document.getElementById('grid-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition";
+            document.getElementById('list-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-semibold text-blue-600 bg-white shadow-sm transition";
+            document.getElementById('grid-view-btn').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 transition";
             renderArticles();
         };
 
